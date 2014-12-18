@@ -12,7 +12,7 @@ class Board
       row_i < 3 ? (color = :white) : (color = :red)
 
       row.each_with_index do |space, col_i|
-        if (row_i < 3 || row_i > 4) && dark?(row_i, col_i)
+        if (row_i < 3 || row_i > 4) && dark_piece?(row_i, col_i)
             @game_board[row_i][col_i] = Piece.new([row_i, col_i], self, color, false)
         end
       end
@@ -20,16 +20,32 @@ class Board
   end
 
   def do_move(start, sequence)
-    p "Start: #{start}"
-    p "Sequence: #{sequence}"
-    if in_bounds?(start) && !self[start].nil? && sequence.all?{|pos| in_bounds?(pos)}
+    if check_bounds(start, sequence)
+      #only start/end, try a single move
       if sequence.length < 2
-        p sequence.first
-        self[start].perform_slide(sequence.first)
+        if is_jump?(start, sequence.first)
+          self[start].perform_jump(sequence.first)
+        else
+          self[start].perform_slide(sequence.first)
+        end
+      #multiple destinations, try a chain of jumps
+      else
+        self[start].perform_jumps(sequence)
       end
     else
-      puts "Error, out of bounds"
+      puts "Error, invalid move."
     end
+
+  end
+
+  def is_jump?(first, second)
+    row1, col1 = first
+    row2, col2 = second
+    (row2 - row1).abs > 1
+  end
+
+  def check_bounds(start, sequence)
+    in_bounds?(start) && !self[start].nil? && sequence.all?{|pos| in_bounds?(pos)}
   end
 
   def in_bounds?(coords)
@@ -47,16 +63,20 @@ class Board
     @game_board[row][col] = p
   end
 
-  def dark?(row_idx, col_idx)
+  def dark_piece?(row_idx, col_idx)
     (row_idx % 2 == 0) && (col_idx % 2 != 0) || (row_idx % 2 != 0) && (col_idx % 2 == 0)
   end
 
   def inspect
     types = {:pawn => "♙", :king => "♔"}
 
+    print " "
+    8.times{|time| print "#{time} "}
+    puts ""
     @game_board.each_with_index do |row, row_i|
+      print "#{row_i}"
       row.each_with_index do |piece, col_i|
-        dark?(row_i, col_i) ? (back = :green) : (back = :black)
+        dark_piece?(row_i, col_i) ? (back = :green) : (back = :black)
 
         if piece.nil?
           print "  ".colorize(:background => back)

@@ -9,17 +9,23 @@ class Piece
 
   def move_diffs
     if isKing
-      return [[1,1], [-1,-1], [1,-1], [-1, 1]]
-    elsif :color == :W
-      return [[1, -1], [-1, -1]]
+      return [[1,-1],[1, 1], [-1, -1], [-1, 1]]
+    elsif @color == :white
+      return [[1, -1], [1, 1]]
     else
-      return [[-1, 1], [1, 1]]
+      return [[-1, -1], [-1, 1]]
     end
   end
 
   def perform_slide(end_pos)
     raise StandardError.new('cannot move into piece') if !@board[end_pos].nil?
-    raise StandardError.new('cannot move there') if !move_diffs.include?(end_pos)
+    # possbile are those we can get it using our differences from our start
+    possible_moves = move_diffs.map do |diff|
+      delta_row, delta_col = diff
+      p [@pos[0] + delta_row, @pos[1] + delta_col]
+      [@pos[0] + delta_row, @pos[1] + delta_col]
+    end
+    raise StandardError.new('cannot move that way') if !possible_moves.include?(end_pos)
 
     @board[end_pos] = self
     @board[@pos] = nil
@@ -28,15 +34,42 @@ class Piece
     maybe_promote
   end
 
+  def perform_jumps(seq)
+
+  end
+
+  def valid_jumps?(dupped, seq)
+
+  end
+
   def perform_jump(end_pos)
-    possible_jumps = move_diffs.map{|coors| coords.map{|val| val*2}}
-    raise 'cannot move there' if !possible_jumps.include?(end_pos)
-    raise 'cannot move into piece' if !@board[end_pos].nil?
+    # jump_deltas = move_diffs.map{|coords| coords.map{|val| val*2}}
+    # possible_jumps = jump_deltas.map do |diff|
+    #   delta_row, delta_col = diff
+    #   [@pos[0] + delta_row, @pos[1] + delta_col]
+    # end
+    jumped_piece = []
+    possible_jumps = move_diffs.map do |diff|
+      mid_row, mid_col = diff
+      delta_row = 2*mid_row
+      delta_col = 2*mid_col
+
+      jumpee = [@pos[0] + delta_row, @pos[1] + delta_col]
+      if jumpee == end_pos
+        jumped_piece = [@pos[0] + mid_row, @pos[1] + mid_col]
+      end
+
+      jumpee
+    end
+
+    raise StandardError.new('cannot move there') if !possible_jumps.include?(end_pos)
+    raise StandardError.new('cannot move into piece') if !@board[end_pos].nil?
+    if @board[jumped_piece].color == @color
+      raise StandardError.new('cannot jump friendly piece')
+    end
 
     @board[end_pos] = self
-    midpoint = end_pos.map{|val| val/2}
-    #set both the jumped piece pos and our previous pos to nil
-    @board[midpoint] = nil
+    @board[jumped_piece] = nil
     @board[@pos] = nil
 
     update_pos(end_pos)
@@ -47,11 +80,19 @@ class Piece
     @pos = coords
   end
 
+  def dup_board
+    
+  end
+
   def maybe_promote
     if @color == :white && @pos[0] == 7
       @isKing = true
     elsif @color == :red && @pos[0] == 0
       @isKing = true
     end
+  end
+
+  def inspect
+    "Pos: #{@pos} Col: #{@color}"
   end
 end
