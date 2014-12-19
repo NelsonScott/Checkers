@@ -28,9 +28,7 @@ class Board
 
     @game_board.each_with_index do |row, row_i|
       row.each_with_index do |pdata, col_i|
-        p "Duping: #{pdata}"
         if !pdata.nil?
-          p "Found it was not nil"
           dup_p = Piece.new(pdata.pos, dupped_board, pdata.color, pdata.isKing)
           dupped_board[[row_i, col_i]] = dup_p
         end
@@ -52,7 +50,7 @@ class Board
       #multiple destinations, try a chain of jumps
       else
         if self[start].perform_jumps(sequence)
-          puts "Jumps success."
+          puts "Jumping success."
         else
           puts "Invalid jump sequence."
         end

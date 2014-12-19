@@ -22,7 +22,6 @@ class Piece
     # possbile are those we can get it using our differences from our start
     possible_moves = move_diffs.map do |diff|
       delta_row, delta_col = diff
-      p [@pos[0] + delta_row, @pos[1] + delta_col]
       [@pos[0] + delta_row, @pos[1] + delta_col]
     end
     raise StandardError.new('cannot move that way') if !possible_moves.include?(end_pos)
