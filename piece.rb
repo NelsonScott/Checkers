@@ -35,14 +35,12 @@ class Piece
   end
 
   def perform_jumps(seq)
-    puts "In piece,performing jumps"
     begin
       dupped_board = duplicate_board
-      puts "Correctly dupped board"
       valid_jumps?(dupped_board, seq)
     rescue StandardError => e
       puts "invalid jumps sequence"
-      puts e.backtrace
+      # puts e.backtrace
       puts e.message
       return false
     end
@@ -50,7 +48,7 @@ class Piece
     seq.each do |pos|
       self.perform_jump(pos)
     end
-    
+
     return true
   end
 
@@ -96,7 +94,6 @@ class Piece
   end
 
   def duplicate_board
-    puts "called duplicate"
     @board.dup
   end
 

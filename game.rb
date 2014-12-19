@@ -7,21 +7,32 @@ class Game
     white_turn = true
 
     loop do
+      system "clear"
+
       begin
         b.inspect
-        white_turn ? (puts "White's turn.") : (puts "Red's turn.")
+        if white_turn
+          turn_color = :white
+          puts " "
+          puts "White's turn."
+        else
+          turn_color = :red
+          puts "Red's turn."
+        end
 
         start = get_start
+        if b[start].color != turn_color
+          raise StandardError.new("Wrong color piece.")
+        end
         finish = get_finish
 
         b.do_move(start, finish)
       rescue StandardError => e
-        puts e.backtrace
-        puts e.message
+        system "clear"
+        puts "Invalid: " + e.message
         retry
       end
 
-      #if successful
       white_turn = !white_turn
     end
   end

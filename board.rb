@@ -51,7 +51,6 @@ class Board
         end
       #multiple destinations, try a chain of jumps
       else
-        puts "Seq longer, perform jumps"
         if self[start].perform_jumps(sequence)
           puts "Jumps success."
         else
