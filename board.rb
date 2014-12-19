@@ -4,19 +4,40 @@ require_relative 'piece'
 
 class Board
   attr_reader :game_board
-  def initialize(size = 8)
-    @game_board = Array.new(size) { Array.new(size) {nil} }
-    row = 0
+  def initialize(fill_board = true)
+    make_starting_grid(fill_board)
+  end
+
+  def make_starting_grid(fill_board)
+    @game_board = Array.new(8) { Array.new(8) {nil} }
+    return unless fill_board
 
     @game_board.each_with_index do |row, row_i|
       row_i < 3 ? (color = :white) : (color = :red)
 
       row.each_with_index do |space, col_i|
         if (row_i < 3 || row_i > 4) && dark_piece?(row_i, col_i)
-            @game_board[row_i][col_i] = Piece.new([row_i, col_i], self, color, false)
+          @game_board[row_i][col_i] = Piece.new([row_i, col_i], self, color, false)
         end
       end
     end
+  end
+
+  def dup
+    dupped_board = Board.new(false)
+
+    @game_board.each_with_index do |row, row_i|
+      row.each_with_index do |pdata, col_i|
+        p "Duping: #{pdata}"
+        if !pdata.nil?
+          p "Found it was not nil"
+          dup_p = Piece.new(pdata.pos, dupped_board, pdata.color, pdata.isKing)
+          dupped_board[[row_i, col_i]] = dup_p
+        end
+      end
+    end
+
+    dupped_board
   end
 
   def do_move(start, sequence)
@@ -30,10 +51,15 @@ class Board
         end
       #multiple destinations, try a chain of jumps
       else
-        self[start].perform_jumps(sequence)
+        puts "Seq longer, perform jumps"
+        if self[start].perform_jumps(sequence)
+          puts "Jumps success."
+        else
+          puts "Invalid jump sequence."
+        end
       end
     else
-      puts "Error, invalid move."
+      puts "Error, incorrect bounds."
     end
 
   end
@@ -58,9 +84,9 @@ class Board
     @game_board[row][col]
   end
 
-  def []=(coords, p)
+  def []=(coords, pce)
     row, col = coords
-    @game_board[row][col] = p
+    @game_board[row][col] = pce
   end
 
   def dark_piece?(row_idx, col_idx)

@@ -35,19 +35,34 @@ class Piece
   end
 
   def perform_jumps(seq)
+    puts "In piece,performing jumps"
+    begin
+      dupped_board = duplicate_board
+      puts "Correctly dupped board"
+      valid_jumps?(dupped_board, seq)
+    rescue StandardError => e
+      puts "invalid jumps sequence"
+      puts e.backtrace
+      puts e.message
+      return false
+    end
 
+    seq.each do |pos|
+      self.perform_jump(pos)
+    end
+    
+    return true
   end
 
-  def valid_jumps?(dupped, seq)
+  def valid_jumps?(dupped_board, seq)
+    dupe_piece = dupped_board[@pos]
 
+    seq.each do |pos|
+      dupe_piece.perform_jump(pos)
+    end
   end
 
   def perform_jump(end_pos)
-    # jump_deltas = move_diffs.map{|coords| coords.map{|val| val*2}}
-    # possible_jumps = jump_deltas.map do |diff|
-    #   delta_row, delta_col = diff
-    #   [@pos[0] + delta_row, @pos[1] + delta_col]
-    # end
     jumped_piece = []
     possible_jumps = move_diffs.map do |diff|
       mid_row, mid_col = diff
@@ -80,8 +95,9 @@ class Piece
     @pos = coords
   end
 
-  def dup_board
-    
+  def duplicate_board
+    puts "called duplicate"
+    @board.dup
   end
 
   def maybe_promote
@@ -93,6 +109,10 @@ class Piece
   end
 
   def inspect
+    "Pos: #{@pos} Col: #{@color}"
+  end
+
+  def to_s
     "Pos: #{@pos} Col: #{@color}"
   end
 end
